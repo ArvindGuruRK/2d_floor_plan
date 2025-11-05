@@ -32,6 +32,49 @@
         background-size: 2rem 2rem;
         background-position: center center;
       }
+      /* Custom styles for the progress bar slider */
+      .progress-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        background: transparent;
+        cursor: pointer;
+        width: 100%;
+      }
+      .progress-slider:focus {
+        outline: none;
+      }
+
+      /* Webkit (Chrome, Safari) */
+      .progress-slider::-webkit-slider-runnable-track {
+        background: linear-gradient(to right, #ec4899 var(--fill-percentage), #334155 var(--fill-percentage)); /* pink-500, slate-700 */
+        height: 0.5rem;
+        border-radius: 0.5rem;
+      }
+      .progress-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        margin-top: -0.25rem; /* Vertically center thumb */
+        background-color: #f8fafc; /* slate-50 */
+        height: 1rem;
+        width: 1rem;
+        border-radius: 9999px;
+        border: 2px solid #ec4899; /* pink-500 */
+      }
+
+      /* Firefox */
+      .progress-slider::-moz-range-track {
+        background: linear-gradient(to right, #ec4899 var(--fill-percentage), #334155 var(--fill-percentage));
+        height: 0.5rem;
+        border-radius: 0.5rem;
+        border: none;
+      }
+      .progress-slider::-moz-range-thumb {
+        background-color: #f8fafc; /* slate-50 */
+        height: 1rem;
+        width: 1rem;
+        border-radius: 9999px;
+        border: 2px solid #ec4899; /* pink-500 */
+      }
     </style>
   <script type="importmap">
 {

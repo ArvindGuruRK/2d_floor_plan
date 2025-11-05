@@ -3,8 +3,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { generateFloorPlans } from './services/geminiService';
 
 // TYPE DEFINITIONS
-export type Units = 'metric' | 'imperial';
-
 export interface FloorPlanRequirements {
   plotSize: number;
   bedrooms: number;
@@ -17,16 +15,6 @@ export interface FloorPlanRequirements {
 }
 
 // HELPER UI COMPONENTS
-
-const UnitsToggle = ({ value, onToggle }: { value: Units, onToggle: (value: Units) => void }) => (
-  <div>
-    <label className="block text-sm font-medium text-slate-300 mb-2">Units</label>
-    <div className="flex bg-slate-800/50 p-1 rounded-lg">
-        <button onClick={() => onToggle('metric')} className={`flex-1 text-center text-sm py-1.5 rounded-md transition-colors ${value === 'metric' ? 'bg-pink-600 text-white shadow' : 'text-slate-400 hover:bg-slate-700'}`}>Metric</button>
-        <button onClick={() => onToggle('imperial')} className={`flex-1 text-center text-sm py-1.5 rounded-md transition-colors ${value === 'imperial' ? 'bg-pink-600 text-white shadow' : 'text-slate-400 hover:bg-slate-700'}`}>Imperial</button>
-    </div>
-  </div>
-);
 
 // Fix: Changed component to be of type React.FC and defined props with an interface to allow for the 'key' prop used in loops.
 interface RoomStepperProps {
@@ -114,9 +102,8 @@ const ImageGrid = ({ images }: { images: string[] }) => (
 
 // MAIN APP COMPONENT
 export default function App() {
-    const [units, setUnits] = useState<Units>('metric');
     const [requirements, setRequirements] = useState<FloorPlanRequirements>({
-        plotSize: 250,
+        plotSize: 800,
         bedrooms: 2,
         bathrooms: 2,
         livingRooms: 1,
@@ -128,18 +115,6 @@ export default function App() {
     const [generatedImages, setGeneratedImages] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
-    const handleUnitToggle = (newUnit: Units) => {
-        setUnits(newUnit);
-        setRequirements(prev => {
-            const isMetric = newUnit === 'metric';
-            const conversionFactor = 10.764;
-            const newSize = isMetric 
-                ? Math.round(prev.plotSize / conversionFactor / 5) * 5 
-                : Math.round(prev.plotSize * conversionFactor / 50) * 50;
-            return { ...prev, plotSize: newSize || (isMetric ? 100 : 1000) };
-        });
-    }
 
     const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setRequirements(prev => ({ ...prev, plotSize: parseInt(e.target.value, 10) }));
@@ -164,14 +139,14 @@ export default function App() {
         setGeneratedImages([]);
 
         try {
-            const images = await generateFloorPlans(requirements, units);
+            const images = await generateFloorPlans(requirements);
             setGeneratedImages(images);
         } catch (err: any) {
             setError(err.message || 'An unknown error occurred.');
         } finally {
             setIsLoading(false);
         }
-    }, [requirements, units]);
+    }, [requirements]);
 
     const rooms: (keyof FloorPlanRequirements)[] = ['bedrooms', 'bathrooms', 'kitchens', 'livingRooms'];
     const features: (keyof FloorPlanRequirements)[] = ['hasDining', 'hasBalcony', 'hasParking'];
@@ -181,6 +156,12 @@ export default function App() {
     const featureLabels: { [key in keyof FloorPlanRequirements]?: string } = {
         hasDining: 'Dining Area', hasBalcony: 'Balcony', hasParking: 'Car Parking'
     };
+
+    const minPlotSize = 100;
+    const maxPlotSize = 1500;
+    const plotSizePercentage = ((requirements.plotSize - minPlotSize) / (maxPlotSize - minPlotSize)) * 100;
+    const sliderStyle = { '--fill-percentage': `${plotSizePercentage}%` } as React.CSSProperties;
+
 
     return (
         <div className="flex h-screen bg-[#0B0F19] text-white font-sans">
@@ -195,22 +176,21 @@ export default function App() {
 
                 <form onSubmit={handleSubmit} className="flex-1 p-6 overflow-y-auto flex flex-col">
                     <div className="space-y-6">
-                        <UnitsToggle value={units} onToggle={handleUnitToggle} />
-                        
                         <div>
                             <div className="flex justify-between items-baseline">
-                                <label htmlFor="total-area" className="text-sm font-medium text-slate-300">Total Area</label>
-                                <span className="text-sm font-semibold">{requirements.plotSize} {units === 'metric' ? 'm²' : 'ft²'}</span>
+                                <label htmlFor="plot-size" className="text-sm font-medium text-slate-300">Plot Size</label>
+                                <span className="text-sm font-semibold">{requirements.plotSize} ft²</span>
                             </div>
                             <input
-                                id="total-area"
+                                id="plot-size"
                                 type="range"
-                                min={units === 'metric' ? 50 : 500}
-                                max={units === 'metric' ? 500 : 5000}
-                                step={units === 'metric' ? 5 : 50}
+                                min={minPlotSize}
+                                max={maxPlotSize}
+                                step="25"
                                 value={requirements.plotSize}
                                 onChange={handleSliderChange}
-                                className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer range-lg accent-pink-500 mt-2"
+                                style={sliderStyle}
+                                className="progress-slider w-full mt-2"
                             />
                         </div>
 

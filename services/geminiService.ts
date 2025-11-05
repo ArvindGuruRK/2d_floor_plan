@@ -1,10 +1,10 @@
 
 import { GoogleGenAI } from "@google/genai";
-import type { FloorPlanRequirements, Units } from '../App';
+import type { FloorPlanRequirements } from '../App';
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
 
-export async function generateFloorPlans(requirements: FloorPlanRequirements, units: Units): Promise<string[]> {
+export async function generateFloorPlans(requirements: FloorPlanRequirements): Promise<string[]> {
   const {
     plotSize,
     bedrooms,
@@ -16,7 +16,7 @@ export async function generateFloorPlans(requirements: FloorPlanRequirements, un
     hasParking,
   } = requirements;
 
-  const unitString = units === 'metric' ? 'sq.m' : 'sq.ft';
+  const unitString = 'sq.ft';
 
   const prompt = `
 Generate 4 clean, professional, architectural 2D floor plan images with these requirements:
