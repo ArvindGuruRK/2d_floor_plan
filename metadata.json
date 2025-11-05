@@ -1,0 +1,5 @@
+{
+  "name": "AI 2D Floor Plan Generator",
+  "description": "An application that generates professional 2D architectural floor plan images based on user-defined requirements using AI. Users can specify plot size, room counts, and other features to get four distinct layout options.",
+  "requestFramePermissions": []
+}
